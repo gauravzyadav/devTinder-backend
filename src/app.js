@@ -2,20 +2,16 @@ const express = require("express");
 
 const app = express();
 
-app.use("/user",
-    (req,res,next) => {                      //route handler
-    //res.send("1st response");               //route handler
-    next();                                   //route handler
-    },
-    (req,res,next) => {
-    //res.send("2nd response");
-    next();
-    },
-    (req,res,next) => {
-    res.send("3rd response");
-    ;
-    },
-);
+const { adminAuth } = require("./middleware/auth");
+
+app.use("/admin", adminAuth);
+
+app.use("/admin/name",adminAuth, (req,res) => {
+    res.send("admin name is given");
+});
+app.use("/admin/getAllData",adminAuth, (req,res) => {
+    res.send("All data are given");
+});
 
 
 app.listen(3000, ()=> {
