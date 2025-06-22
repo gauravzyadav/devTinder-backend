@@ -4,6 +4,7 @@ const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
+require('dotenv').config();
 
 // Logging middleware for all requests
 // app.use((req, res, next) => {
@@ -36,7 +37,7 @@ app.use("/", userRouter);
 connectDB()
   .then(() => {
     console.log("Database conection established..."); // first connect to your database
-    app.listen(3000, () => {
+    app.listen(process.env.PORT, () => {
       console.log("Server is successfully listening on port 3000.."); //then listen to the server on 30000
     });
   })
