@@ -4,7 +4,7 @@ const authRouter = express.Router();
 const { validateSignUpData } = require("../utils/validation");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
-const { userAuth } = require("../middleware/auth");
+const { userAuth } = require("../middlewares/auth");
 
 // signup account
 authRouter.post("/signup", async (req, res) => {
@@ -25,9 +25,15 @@ authRouter.post("/signup", async (req, res) => {
       emailId,
       password: passwordHash,
     });
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+
+      // add the token to the cookie and send back it to the browser
+      res.cookie("token", token);
+
 
     await user.save();
-    res.send("User Added Successfully!");
+    res.json({message: "User Added Successfully!", data: savedUser});
   } catch (err) {
     res.status(400).send("Error : " + err.message);
   }
@@ -52,9 +58,9 @@ authRouter.post("/login", async (req, res) => {
 
       // add the token to the cookie and send back it to the browser
       res.cookie("token", token);
-      res.send("User login successfully!!");
+      res.send(user);
     } else {
-      res.send("Invalid credentials");
+      throw new Error("Invalid credentials");
     }
   } catch (err) {
     res.status(400).send("Error : " + err.message);
