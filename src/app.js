@@ -21,6 +21,7 @@ app.use(
   })
 );
 
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -30,12 +31,14 @@ const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const initializeSocket = require("./utils/socket");
 const chatRouter = require("./routes/chat");
+const uploadRouter = require("./routes/upload");
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", chatRouter);
+app.use("/upload", uploadRouter);
 
 const server = http.createServer(app);
 initializeSocket(server);
