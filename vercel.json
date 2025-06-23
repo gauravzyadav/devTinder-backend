@@ -11,14 +11,6 @@
         "src": "/(.*)",
         "dest": "src/app.js"
       }
-    ],
-    "env": {
-      "NODE_ENV": "production"
-    },
-    "functions": {
-      "src/app.js": {
-        "maxDuration": 30
-      }
-    }
+    ]
   }
   
