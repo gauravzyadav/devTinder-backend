@@ -65,34 +65,42 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // For Vercel deployment - connect to DB on each request
-let isConnected = false
+
+let isConnected = false;
 
 const connectToDatabase = async () => {
-  if (isConnected) {
-    return
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return;
   }
 
   try {
-    await connectDB()
-    isConnected = true
-    console.log("Database connection established for serverless...")
+    if (mongoose.connection.readyState === 0) {
+      await connectDB();
+    }
+    isConnected = true;
+    console.log("Database connection established for serverless...");
   } catch (error) {
-    console.error("Database connection failed:", error)
-    throw error
+    console.error("Database connection failed:", error);
+    isConnected = false;
+    throw error;
   }
-}
+};
 
 // Middleware to ensure DB connection for each request in production
 app.use(async (req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     try {
-      await connectToDatabase()
+      await connectToDatabase();
     } catch (error) {
-      return res.status(500).json({ error: "Database connection failed" })
+      console.error("Database middleware error:", error);
+      return res.status(500).json({ 
+        error: "Database connection failed",
+        message: error.message 
+      });
     }
   }
-  next()
-})
+  next();
+});
 
-// Export for Vercel
+
 module.exports = app
