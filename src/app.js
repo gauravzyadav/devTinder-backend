@@ -15,7 +15,7 @@ const http = require("http");
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin:["http://localhost:5173","https://dev-tinder-web-match-making.vercel.app"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // ✅ allow PATCH
     credentials: true,
   })
