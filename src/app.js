@@ -25,6 +25,24 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// 🔧 ADD THIS: Root route to show API is working
+app.get("/", (req, res) => {
+  res.json({
+    message: "DevTinder Backend API is running! 🚀",
+    status: "success",
+    endpoints: {
+      auth: "/signup, /login, /logout",
+      profile: "/profile/view, /profile/edit",
+      requests: "/sendConnectionRequest, /user/requests/received",
+      connections: "/user/connections",
+      feed: "/feed",
+      chat: "/chat",
+      upload: "/upload",
+    },
+    documentation: "Add your API documentation URL here",
+  })
+})
+
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
