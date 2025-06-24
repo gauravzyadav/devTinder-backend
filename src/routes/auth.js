@@ -6,74 +6,103 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const { userAuth } = require("../middlewares/auth");
 
-// signup account
+// 🔧 UPDATED SIGNUP ROUTE
 authRouter.post("/signup", async (req, res) => {
   try {
-    //Validate the data
+    // Validate the data
     validateSignUpData(req);
 
     const { firstName, lastName, emailId, password } = req.body;
 
-    //Encrypt the password
+    // Encrypt the password
     const passwordHash = await bcrypt.hash(password, 10);
-    //console.log(passwordHash);
 
-    //Creating a new instance of the model
+    // Creating a new instance of the model
     const user = new User({
       firstName,
       lastName,
       emailId,
       password: passwordHash,
     });
+
     const savedUser = await user.save();
     const token = await savedUser.getJWT();
 
-      // add the token to the cookie and send back it to the browser
-      res.cookie("token", token);
+    // Set cookie (for same-domain requests)
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000), // 8 hours
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
 
-
-    await user.save();
-    res.json({message: "User Added Successfully!", data: savedUser});
+    // 🔧 ALSO send token in response (for cross-domain requests)
+    res.json({
+      message: "User Added Successfully!",
+      user: savedUser,
+      token: token, // ← Key addition for cross-domain
+    });
   } catch (err) {
-    res.status(400).send("Error : " + err.message);
+    res.status(400).json({ message: "Error: " + err.message });
   }
 });
 
-// login account
+// 🔧 UPDATED LOGIN ROUTE
 authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
-    //is email id present in db
+    // is email id present in db
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid credentials");
     }
-    //is passord matches with th eemail id paasword in db
+
+    // is password matches with the email id password in db
     const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
       // create JWT token
       const token = await user.getJWT();
 
-      // add the token to the cookie and send back it to the browser
-      res.cookie("token", token);
-      res.send(user);
+      // Set cookie (for same-domain requests)
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000), // 8 hours
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
+
+      // 🔧 ALSO send token in response (for cross-domain requests)
+      res.json({
+        message: "Login successful",
+        user: user,
+        token: token, // ← Key addition for cross-domain
+      });
     } else {
       throw new Error("Invalid credentials");
     }
   } catch (err) {
-    res.status(400).send("Error : " + err.message);
+    res.status(400).json({ message: "Error: " + err.message });
   }
 });
 
-//logout
+// 🔧 UPDATED LOGOUT ROUTE
 authRouter.post("/logout", userAuth, async (req, res) => {
-    //make cookie null "now"
+  try {
+    // Clear cookie
     res.cookie("token", null, {
-        expires: new Date(Date.now()),
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
-    res.send("Logout Successfull");
+
+    // 🔧 Send JSON response instead of plain text
+    res.json({ message: "Logout Successful" });
+  } catch (err) {
+    res.status(400).json({ message: "Error: " + err.message });
+  }
 });
 
 module.exports = authRouter;
