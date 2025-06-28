@@ -10,12 +10,20 @@ const getSecretRoomId = (userId, targetUserId) => {
     .digest("hex");
 };
 
-const initializeSocket = (server) => {
-  const io = socket(server, {
-    cors: {
-      origin: "http://localhost:5173",
-    },
-  });
+  const initializeSocket = (server) => {
+    const io = socket(server, {
+      cors: {
+        origin: [
+          "http://localhost:5173",           
+          "https://dev-tinder-web-match-making.vercel.app" 
+        ],
+        credentials: true,
+        methods: ["GET", "POST"]
+      },
+      // 🔧 Add these additional configurations for deployed environments
+      transports: ['websocket', 'polling'],
+      allowEIO3: true
+    });
 
   io.on("connection", (socket) => {
     socket.on("joinChat", ({ firstName, userId, targetUserId }) => {
