@@ -30,11 +30,11 @@ authRouter.post("/signup", async (req, res) => {
 
     // Set cookie (for same-domain requests)
     res.cookie("token", token, {
-      expires: new Date(Date.now() + 8 * 3600000), // 8 hours
+      expires: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    });
+    });    
 
     // 🔧 ALSO send token in response (for cross-domain requests)
     res.json({
